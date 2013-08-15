@@ -171,6 +171,14 @@ config MFD_DA9063
 	  Additional drivers must be enabled in order to use the functionality
 	  of the device.
 
+config MFD_HI6421_PMIC
+	tristate "HiSilicon Hi6421 PMU/Codec IC"
+	depends on OF
+	help
+	  This driver supports HiSilicon Hi6421 power management and codec IC,
+	  including regulators, codec, ADCs, Coulomb counter, etc. Memory
+	  mapped I/O ports are the way of communication with it.
+
 config MFD_MC13XXX
 	tristate
 	depends on (SPI_MASTER || I2C)
