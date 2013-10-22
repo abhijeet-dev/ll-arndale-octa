@@ -236,6 +236,18 @@ static struct irq_chip pl061_irqchip = {
 	.irq_set_type	= pl061_irq_type,
 };
 
+/* Parse gpio base from DT */
+static int pl061_parse_gpio_base(struct device *dev)
+{
+	struct device_node *np = dev->of_node;
+	int ret, id;
+
+	id = of_alias_get_id(np, "gpio");
+	if (id < 0)
+		return id;
+	return (id * PL061_GPIO_NR);
+}
+
 static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 {
 	struct device *dev = &adev->dev;
@@ -255,7 +267,7 @@ static int pl061_probe(struct amba_device *adev, const struct amba_id *id)
 			return -ENODEV;
 		}
 	} else {
-		chip->gc.base = -1;
+		chip->gc.base = pl061_parse_gpio_base(dev);
 		irq_base = 0;
 	}
 
