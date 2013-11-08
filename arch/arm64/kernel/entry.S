@@ -650,6 +650,10 @@ ENDPROC(el0_svc)
 __sys_trace:
 	mov	x0, sp
 	bl	syscall_trace_enter
+#ifdef CONFIG_SECCOMP
+	cmp	w0, #-EPERM			// check seccomp result
+	b.eq	ret_to_user			// -EPERM means 'rejected'
+#endif
 	adr	lr, __sys_trace_return		// return address
 	uxtw	scno, w0			// syscall number (possibly new)
 	mov	x1, sp				// pointer to regs
