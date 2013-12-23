@@ -4,6 +4,10 @@ Hisilicon Platforms Device Tree Bindings
 Hi4511 Board
 Required root node properties:
 	- compatible = "hisilicon,hi3620-hi4511";
+HiP04 D01 Board
+Required root node properties:
+	- compatible = "hisilicon,hip04-d01";
+
 
 Hisilicon system controller
 
@@ -19,6 +23,13 @@ Optional properties:
 		If reg value is not zero, cpun exit wfi and go
 - resume-offset : offset in sysctrl for notifying cpu0 when resume
 - reboot-offset : offset in sysctrl for system reboot
+- relocation-entry : relocation address of secondary cpu boot code
+- relocation-size : relocation size of secondary cpu boot code
+- bootwrapper-phys : physical address of boot wrapper
+- bootwrapper-size : size of boot wrapper
+- bootwrapper-magic : magic number for secondary cpu in boot wrapper
+The memory area of [bootwrapper-phys : bootwrapper-phys+bootwrapper-size]
+should be reserved. This should be set in /memreserve/ node in DTS file.
 
 Example:
 
@@ -30,6 +41,7 @@ Example:
 		resume-offset = <0x308>;
 		reboot-offset = <0x4>;
 	};
+
 
 PCTRL: Peripheral misc control register
 
@@ -44,3 +56,10 @@ Example:
 		compatible = "hisilicon,pctrl";
 		reg = <0xfca09000 0x1000>;
 	};
+
+
+Fabric:
+
+Required Properties:
+- compatible: "hisilicon,hip04-fabric";
+- reg: Address and size of Fabric

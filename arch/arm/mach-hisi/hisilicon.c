@@ -96,3 +96,15 @@ DT_MACHINE_START(HI3620, "Hisilicon Hi3620 (Flattened Device Tree)")
 	.init_machine	= hi3xxx_init,
 	.restart	= hi3xxx_restart,
 MACHINE_END
+
+#ifdef CONFIG_ARCH_HIP04
+static const char *hip04_compat[] __initconst = {
+	"hisilicon,hip04-d01",
+	NULL,
+};
+
+DT_MACHINE_START(HIP04, "Hisilicon HiP04 (Flattened Device Tree)")
+	.dt_compat	= hip04_compat,
+	.smp_init	= smp_init_ops(hip04_smp_init_ops),
+MACHINE_END
+#endif

@@ -12,4 +12,6 @@ extern void hi3xxx_cpu_die(unsigned int cpu);
 extern int hi3xxx_cpu_kill(unsigned int cpu);
 extern void hi3xxx_set_cpu(int cpu, bool enable);
 
+extern bool __init hip04_smp_init_ops(void);
+
 #endif

@@ -1,0 +1,20 @@
+* Hisilicon HiP04 Clock Controller
+
+The HiP04 clock controller generates and supplies clock to various
+controllers within the HiP04 SoC.
+
+Required Properties:
+
+- compatible: should be one of the following.
+  - "hisilicon,hip04-clock" - controller compatible with HiP04 SoC.
+
+- reg: physical base address of the controller and length of memory mapped
+  region.
+
+- #clock-cells: should be 1.
+
+
+Each clock is assigned an identifier and client nodes use this identifier
+to specify the clock which they consume.
+
+All these identifier could be found in <dt-bindings/clock/hip04-clock.h>.
