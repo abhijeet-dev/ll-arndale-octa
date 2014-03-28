@@ -39,11 +39,14 @@ mon_vectors:
 	W(b)	.	/* fiq */
 
 /* Return directly back to the caller without leaving Hyp mode: */
-1:	mrs	lr, elr_hyp
+1:
+ARM_BE8(setend	be)
+	mrs	lr, elr_hyp
 	mov	pc, lr
 
 /* In monitor mode, set up HVBAR and SCR then return to caller in NS-SVC. */
 2:
+ARM_BE8(setend	be)
 	mrc	p15, 0, r1, c1, c1, 0		@ SCR
 	/*
 	 * Set SCR.NS=1(needed for setting HVBAR and also returning to NS state)
