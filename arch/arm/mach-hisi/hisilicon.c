@@ -17,6 +17,7 @@
 #include <linux/of_address.h>
 #include <linux/of_platform.h>
 
+#include <asm/hardware/cache-l2x0.h>
 #include <asm/proc-fns.h>
 
 #include <asm/mach/arch.h>
@@ -49,6 +50,12 @@ static void __init hi3620_map_io(void)
 {
 	debug_ll_io_init();
 	iotable_init(hi3620_io_desc, ARRAY_SIZE(hi3620_io_desc));
+}
+
+static void __init hi3xxx_init(void)
+{
+	l2x0_of_init(0, ~0);
+	of_platform_populate(NULL, of_default_bus_match_table, NULL, NULL);
 }
 
 static void hi3xxx_restart(enum reboot_mode mode, const char *cmd)
@@ -86,5 +93,6 @@ DT_MACHINE_START(HI3620, "Hisilicon Hi3620 (Flattened Device Tree)")
 	.map_io		= hi3620_map_io,
 	.dt_compat	= hi3xxx_compat,
 	.smp		= smp_ops(hi3xxx_smp_ops),
+	.init_machine	= hi3xxx_init,
 	.restart	= hi3xxx_restart,
 MACHINE_END
