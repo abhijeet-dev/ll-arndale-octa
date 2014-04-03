@@ -20,6 +20,8 @@
 #include <linux/init.h>
 #include <linux/interrupt.h>
 #include <linux/device.h>
+#include <linux/of.h>
+#include <linux/of_device.h>
 #include <linux/platform_device.h>
 #include <linux/libata.h>
 #include <linux/ahci_platform.h>
@@ -31,6 +33,7 @@ enum ahci_type {
 	AHCI,		/* standard platform ahci */
 	IMX53_AHCI,	/* ahci on i.mx53 */
 	STRICT_AHCI,	/* delayed DMA engine start */
+	HIP04_AHCI,	/* ahci on HiP04 */
 };
 
 static struct platform_device_id ahci_devtype[] = {
@@ -81,11 +84,38 @@ static const struct ata_port_info ahci_port_info[] = {
 		.udma_mask	= ATA_UDMA6,
 		.port_ops	= &ahci_platform_ops,
 	},
+	[HIP04_AHCI] = {
+		AHCI_HFLAGS	(AHCI_HFLAG_NO_FBS),
+		.flags		= AHCI_FLAG_COMMON,
+		.pio_mask	= ATA_PIO4,
+		.udma_mask	= ATA_UDMA6,
+		.port_ops	= &ahci_platform_ops,
+	},
 };
 
 static struct scsi_host_template ahci_platform_sht = {
 	AHCI_SHT("ahci_platform"),
 };
+
+static const struct of_device_id ahci_of_match[] = {
+	{ .compatible = "snps,spear-ahci", },
+	{ .compatible = "snps,exynos5440-ahci", },
+	{ .compatible = "ibm,476gtr-ahci", },
+	{ .compatible = "hisilicon,hisi-ahci", .data = (void *)HIP04_AHCI, },
+	{},
+};
+MODULE_DEVICE_TABLE(of, ahci_of_match);
+
+static int ahci_match_of_id(struct platform_device *pdev,
+			    enum ahci_type *ahci_type)
+{
+	const struct of_device_id *of_id = of_match_device(ahci_of_match,
+							   &pdev->dev);
+	if (!of_id)
+		return 1;
+	*ahci_type = (u32)(of_id->data);
+	return 0;
+}
 
 static int ahci_probe(struct platform_device *pdev)
 {
@@ -97,6 +127,7 @@ static int ahci_probe(struct platform_device *pdev)
 	struct ahci_host_priv *hpriv;
 	struct ata_host *host;
 	struct resource *mem;
+	enum ahci_type ahci_type;
 	int irq;
 	int n_ports;
 	int i;
@@ -114,7 +145,9 @@ static int ahci_probe(struct platform_device *pdev)
 		return -EINVAL;
 	}
 
-	if (pdata && pdata->ata_port_info)
+	if (!ahci_match_of_id(pdev, &ahci_type))
+		pi = ahci_port_info[ahci_type];
+	else if (pdata && pdata->ata_port_info)
 		pi = *pdata->ata_port_info;
 
 	hpriv = devm_kzalloc(dev, sizeof(*hpriv), GFP_KERNEL);
@@ -325,15 +358,6 @@ disable_unprepare_clk:
 #endif
 
 static SIMPLE_DEV_PM_OPS(ahci_pm_ops, ahci_suspend, ahci_resume);
-
-static const struct of_device_id ahci_of_match[] = {
-	{ .compatible = "snps,spear-ahci", },
-	{ .compatible = "snps,exynos5440-ahci", },
-	{ .compatible = "ibm,476gtr-ahci", },
-	{ .compatible = "hisilicon,hisi-ahci", },
-	{},
-};
-MODULE_DEVICE_TABLE(of, ahci_of_match);
 
 static struct platform_driver ahci_driver = {
 	.probe = ahci_probe,
