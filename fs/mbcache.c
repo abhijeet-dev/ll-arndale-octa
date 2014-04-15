@@ -93,7 +93,7 @@
 
 #define MB_CACHE_WRITER ((unsigned short)~0U >> 1)
 
-#define MB_CACHE_ENTRY_LOCK_BITS	__builtin_log2(NR_BG_LOCKS)
+#define MB_CACHE_ENTRY_LOCK_BITS	ilog2(NR_BG_LOCKS)
 #define	MB_CACHE_ENTRY_LOCK_INDEX(ce)			\
 	(hash_long((unsigned long)ce, MB_CACHE_ENTRY_LOCK_BITS))
 
