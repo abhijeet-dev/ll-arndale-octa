@@ -419,7 +419,10 @@ vcpu	.req	r0		@ vcpu pointer always in r0
 	ldr	r7, [r2, #GICH_EISR1]
 	ldr	r8, [r2, #GICH_ELRSR0]
 	ldr	r9, [r2, #GICH_ELRSR1]
-	ldr	r10, [r2, #GICH_APR]
+	ldr	r10, [r11, #VGIC_CPU_NR_LR]
+	movs	r10, r10, lsr #HWCFG_APR_SHIFT
+	ldrne	r10, [r2, r10]
+	ldreq	r10, [r2, #GICH_APR]
 
 	str	r3, [r11, #VGIC_CPU_HCR]
 	str	r4, [r11, #VGIC_CPU_VMCR]
@@ -435,9 +438,16 @@ vcpu	.req	r0		@ vcpu pointer always in r0
 	str	r5, [r2, #GICH_HCR]
 
 	/* Save list registers */
-	add	r2, r2, #GICH_LR0
-	add	r3, r11, #VGIC_CPU_LR
 	ldr	r4, [r11, #VGIC_CPU_NR_LR]
+	addeq	r2, r2, #GICH_LR0
+	movne	r10, r4, lsr #HWCFG_APR_SHIFT
+	/* the offset between GICH_APR & GICH_LR0 is 0x10 */
+	addne	r10, r10, #0x10
+	addne	r2, r2, r10
+	add	r3, r11, #VGIC_CPU_LR
+	/* Get NR_LR from VGIC_CPU_NR_LR */
+	ldr	r6, =HWCFG_NR_LR_MASK
+	and	r4, r4, r6
 1:	ldr	r6, [r2], #4
 	str	r6, [r3], #4
 	subs	r4, r4, #1
@@ -469,12 +479,22 @@ vcpu	.req	r0		@ vcpu pointer always in r0
 
 	str	r3, [r2, #GICH_HCR]
 	str	r4, [r2, #GICH_VMCR]
-	str	r8, [r2, #GICH_APR]
+	ldr	r6, [r11, #VGIC_CPU_NR_LR]
+	movs	r6, r6, lsr #HWCFG_APR_SHIFT
+	strne	r8, [r2, r6]
+	streq	r8, [r2, #GICH_APR]
 
 	/* Restore list registers */
-	add	r2, r2, #GICH_LR0
-	add	r3, r11, #VGIC_CPU_LR
 	ldr	r4, [r11, #VGIC_CPU_NR_LR]
+	addeq	r2, r2, #GICH_LR0
+	movne	r6, r4, lsr #HWCFG_APR_SHIFT
+	/* the offset between GICH_APR & GICH_LR0 is 0x10 */
+	addne	r6, r6, #0x10
+	addne	r2, r2, r6
+	/* Get NR_LR from VGIC_CPU_NR_LR */
+	add	r3, r11, #VGIC_CPU_LR
+	ldr	r6, =HWCFG_NR_LR_MASK
+	and	r4, r4, r6
 1:	ldr	r6, [r3], #4
 	str	r6, [r2], #4
 	subs	r4, r4, #1

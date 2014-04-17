@@ -122,7 +122,10 @@ struct vgic_cpu {
 	/* Bitmap of used/free list registers */
 	DECLARE_BITMAP(	lr_used, VGIC_MAX_LRS);
 
-	/* Number of list registers on this CPU */
+	/*
+	 * bit[31:16]: GICH_APR offset
+	 * bit[15:0]:  Number of list registers on this CPU
+	 */
 	int		nr_lr;
 
 	/* CPU vif control registers for world switch */
