@@ -18,25 +18,14 @@
 
 #ifdef CONFIG_SMP
 
+#include "asm/compiler.h"
+
 static inline void set_my_cpu_offset(unsigned long off)
 {
 	asm volatile("msr tpidr_el1, %0" :: "r" (off) : "memory");
 }
 
-static inline unsigned long __my_cpu_offset(void)
-{
-	unsigned long off;
-	register unsigned long *sp asm ("sp");
-
-	/*
-	 * We want to allow caching the value, so avoid using volatile and
-	 * instead use a fake stack read to hazard against barrier().
-	 */
-	asm("mrs %0, tpidr_el1" : "=r" (off) : "Q" (*sp));
-
-	return off;
-}
-#define __my_cpu_offset __my_cpu_offset()
+#define __my_cpu_offset read_TPIDRPRW()
 
 #else	/* !CONFIG_SMP */
 
