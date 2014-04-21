@@ -21,6 +21,28 @@
 		serial2 = &uart2;
 		serial3 = &uart3;
 		serial4 = &uart4;
+		gpio0 = &gpio0;
+		gpio1 = &gpio1;
+		gpio2 = &gpio2;
+		gpio3 = &gpio3;
+		gpio4 = &gpio4;
+		gpio5 = &gpio5;
+		gpio6 = &gpio6;
+		gpio7 = &gpio7;
+		gpio8 = &gpio8;
+		gpio9 = &gpio9;
+		gpio10 = &gpio10;
+		gpio11 = &gpio11;
+		gpio12 = &gpio12;
+		gpio13 = &gpio13;
+		gpio14 = &gpio14;
+		gpio15 = &gpio15;
+		gpio16 = &gpio16;
+		gpio17 = &gpio17;
+		gpio18 = &gpio18;
+		gpio19 = &gpio19;
+		gpio20 = &gpio20;
+		gpio21 = &gpio21;
 	};
 
 	pclk: clk {
