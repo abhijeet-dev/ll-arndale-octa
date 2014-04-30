@@ -206,12 +206,13 @@ static struct platform_device *of_platform_device_create_pdata(
 {
 	struct platform_device *dev;
 
-	if (!of_device_is_available(np))
+	if (!of_device_is_available(np) ||
+			of_node_check_and_set_flag(np, OF_POPULATED))
 		return NULL;
 
 	dev = of_device_alloc(np, bus_id, parent);
 	if (!dev)
-		return NULL;
+		goto err_clear_flag;
 
 #if defined(CONFIG_MICROBLAZE)
 	dev->archdata.dma_mask = 0xffffffffUL;
@@ -229,10 +230,14 @@ static struct platform_device *of_platform_device_create_pdata(
 
 	if (of_device_add(dev) != 0) {
 		platform_device_put(dev);
-		return NULL;
+		goto err_clear_flag;
 	}
 
 	return dev;
+
+err_clear_flag:
+	of_node_clear_flag(np, OF_POPULATED);
+	return NULL;
 }
 
 /**
@@ -264,14 +269,15 @@ static struct amba_device *of_amba_device_create(struct device_node *node,
 
 	pr_debug("Creating amba device %s\n", node->full_name);
 
-	if (!of_device_is_available(node))
+	if (!of_device_is_available(node) ||
+			of_node_check_and_set_flag(node, OF_POPULATED))
 		return NULL;
 
 	dev = amba_device_alloc(NULL, 0, 0);
 	if (!dev) {
 		pr_err("%s(): amba_device_alloc() failed for %s\n",
 		       __func__, node->full_name);
-		return NULL;
+		goto err_clear_flag;
 	}
 
 	/* setup generic device info */
@@ -311,6 +317,8 @@ static struct amba_device *of_amba_device_create(struct device_node *node,
 
 err_free:
 	amba_device_put(dev);
+err_clear_flag:
+	of_node_clear_flag(node, OF_POPULATED);
 	return NULL;
 }
 #else /* CONFIG_ARM_AMBA */
