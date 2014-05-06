@@ -26,12 +26,15 @@ static inline void set_top_pte(unsigned long va, pte_t pte)
 	local_flush_tlb_kernel_page(va);
 }
 
+#ifdef CONFIG_HIGHMEM
 static inline void set_fixmap_pte(int idx, pte_t pte)
 {
 	unsigned long vaddr = __fix_to_virt(FIX_KMAP_BEGIN + idx);
 	set_pte_ext(fixmap_page_table + idx, pte, 0);
 	local_flush_tlb_kernel_page(vaddr);
 }
+#endif
+
 static inline pte_t get_top_pte(unsigned long va)
 {
 	pte_t *ptep = pte_offset_kernel(top_pmd, va);
