@@ -76,6 +76,8 @@
 #define EXYNOS4_PA_TIMER		0x139D0000
 #define EXYNOS5_PA_TIMER		0x12DD0000
 
+#define EXYNOS5_PA_G3D                  0x11800000
+
 /* Compatibility UART */
 
 #define EXYNOS5440_PA_UART0		0x000B0000
