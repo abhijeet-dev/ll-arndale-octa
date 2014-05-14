@@ -1,0 +1,11 @@
+# build on Arndale OCTA board
+# Working linaro image for sd card can be found at: http://releases.linaro.org/14.03/ubuntu/arndale-octa
+
+make LOCALVERSION=  KERNELVERSION=3.14.0-2-linaro-arndale-octa oldconfig
+make LOCALVERSION=  KERNELVERSION=3.14.0-2-linaro-arndale-octa prepare scripts
+make LOCALVERSION=  KERNELVERSION=3.14.0-2-linaro-arndale-octa -j4 zImage modules dtbs
+sudo make LOCALVERSION=  KERNELVERSION=3.14.0-2-linaro-arndale-octa modules_install
+
+kernelversion=`cat ./include/config/kernel.release`
+sudo installkernel $kernelversion ./arch/arm/boot/zImage ./System.map /boot
+
