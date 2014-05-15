@@ -318,6 +318,8 @@ struct mmc_host {
 	int			rescan_disable;	/* disable card detection */
 	int			rescan_entered;	/* used with nonremovable devices */
 
+	bool			trigger_card_event; /* card_event necessary */
+
 	struct mmc_card		*card;		/* device attached to this host */
 
 	wait_queue_head_t	wq;
@@ -413,7 +415,6 @@ int mmc_regulator_get_ocrmask(struct regulator *supply);
 int mmc_regulator_set_ocr(struct mmc_host *mmc,
 			struct regulator *supply,
 			unsigned short vdd_bit);
-int mmc_regulator_get_supply(struct mmc_host *mmc);
 #else
 static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
 {
@@ -426,12 +427,9 @@ static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
 {
 	return 0;
 }
-
-static inline int mmc_regulator_get_supply(struct mmc_host *mmc)
-{
-	return 0;
-}
 #endif
+
+int mmc_regulator_get_supply(struct mmc_host *mmc);
 
 int mmc_pm_notify(struct notifier_block *notify_block, unsigned long, void *);
 

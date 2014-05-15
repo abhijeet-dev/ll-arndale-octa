@@ -1320,30 +1320,37 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
 }
 EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
 
+#endif /* CONFIG_REGULATOR */
+
 int mmc_regulator_get_supply(struct mmc_host *mmc)
 {
 	struct device *dev = mmc_dev(mmc);
-	struct regulator *supply;
 	int ret;
 
-	supply = devm_regulator_get(dev, "vmmc");
-	mmc->supply.vmmc = supply;
+	mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
 	mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
 
-	if (IS_ERR(supply))
-		return PTR_ERR(supply);
+	if (IS_ERR(mmc->supply.vmmc)) {
+		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
+			return -EPROBE_DEFER;
+		dev_info(dev, "No vmmc regulator found\n");
+	} else {
+		ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc);
+		if (ret > 0)
+			mmc->ocr_avail = ret;
+		else
+			dev_warn(dev, "Failed getting OCR mask: %d\n", ret);
+	}
 
-	ret = mmc_regulator_get_ocrmask(supply);
-	if (ret > 0)
-		mmc->ocr_avail = ret;
-	else
-		dev_warn(mmc_dev(mmc), "Failed getting OCR mask: %d\n", ret);
+	if (IS_ERR(mmc->supply.vqmmc)) {
+		if (PTR_ERR(mmc->supply.vqmmc) == -EPROBE_DEFER)
+			return -EPROBE_DEFER;
+		dev_info(dev, "No vqmmc regulator found\n");
+	}
 
 	return 0;
 }
 EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
-
-#endif /* CONFIG_REGULATOR */
 
 /*
  * Mask off any voltages we don't support and select
@@ -1543,8 +1550,13 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
 	host->ios.timing = MMC_TIMING_LEGACY;
 	mmc_set_ios(host);
 
-	/* Set signal voltage to 3.3V */
-	__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330);
+	/* Try to set signal voltage to 3.3V but fall back to 1.8v or 1.2v */
+	if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_330) == 0)
+		dev_dbg(mmc_dev(host), "Initial signal voltage of 3.3v\n");
+	else if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180) == 0)
+		dev_dbg(mmc_dev(host), "Initial signal voltage of 1.8v\n");
+	else if (__mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120) == 0)
+		dev_dbg(mmc_dev(host), "Initial signal voltage of 1.2v\n");
 
 	/*
 	 * This delay should be sufficient to allow the power supply
@@ -2420,6 +2432,11 @@ void mmc_rescan(struct work_struct *work)
 		container_of(work, struct mmc_host, detect.work);
 	int i;
 	bool extend_wakelock = false;
+
+	if (host->trigger_card_event && host->ops->card_event) {
+		host->ops->card_event(host);
+		host->trigger_card_event = false;
+	}
 
 	if (host->rescan_disable)
 		return;
