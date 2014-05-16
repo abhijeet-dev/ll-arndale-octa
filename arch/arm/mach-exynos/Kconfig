@@ -91,6 +91,10 @@ config SOC_EXYNOS5420
 	default y
 	depends on ARCH_EXYNOS5
 	select PM_GENERIC_DOMAINS if PM_RUNTIME
+	select ARCH_HAS_BANDGAP
+	select PINCTRL_EXYNOS
+	select S5P_DEV_MFC
+	select SAMSUNG_DMADEV
 	help
 	  Enable EXYNOS5420 SoC support
 
