@@ -1045,9 +1045,9 @@ static void exynos_dp_phy_init(struct exynos_dp_device *dp)
 	} else if (dp->phy_addr) {
 		u32 reg;
 
-		reg = __raw_readl(dp->phy_addr);
+		reg = readl_relaxed(dp->phy_addr);
 		reg |= dp->enable_mask;
-		__raw_writel(reg, dp->phy_addr);
+		writel_relaxed(reg, dp->phy_addr);
 	}
 }
 
@@ -1058,9 +1058,9 @@ static void exynos_dp_phy_exit(struct exynos_dp_device *dp)
 	} else if (dp->phy_addr) {
 		u32 reg;
 
-		reg = __raw_readl(dp->phy_addr);
+		reg = readl_relaxed(dp->phy_addr);
 		reg &= ~(dp->enable_mask);
-		__raw_writel(reg, dp->phy_addr);
+		writel_relaxed(reg, dp->phy_addr);
 	}
 }
 
