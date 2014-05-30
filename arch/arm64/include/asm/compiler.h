@@ -27,4 +27,37 @@
  */
 #define __asmeq(x, y)  ".ifnc " x "," y " ; .err ; .endif\n\t"
 
+#if defined(CONFIG_SMP) && !defined(CONFIG_CPU_V6)
+/*
+ * Read TPIDRPRW.
+ * GCC requires a workaround as it does not treat a "memory" clobber on a
+ * non-volatile asm block as a side-effect.
+ * We want to allow caching the value, so for GCC avoid using volatile and
+ * instead use a fake stack read to hazard against barrier().
+ */
+#if defined(__clang__)
+static inline unsigned long read_TPIDRPRW(void)
+{
+	unsigned long off = 1;
+
+	/*
+	 * Read TPIDRPRW.
+	 */
+	// FIXME: asm("mrs %0, tpidr_el1" : "=r" (off) : : "memory");
+
+	return off;
+}
+#else
+static inline unsigned long read_TPIDRPRW(void)
+{
+	unsigned long off;
+	register unsigned long *sp asm ("sp");
+
+	asm("mrs %0, tpidr_el1" : "=r" (off) : "Q" (*sp));
+
+	return off;
+}
+#endif
+#endif
+
 #endif	/* __ASM_COMPILER_H */
