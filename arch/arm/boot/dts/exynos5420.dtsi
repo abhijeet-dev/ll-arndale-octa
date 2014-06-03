@@ -981,7 +981,7 @@
 		ranges;
 
 		dwc3 {
-			compatible = "synopsys,dwc3";
+			compatible = "snps,dwc3";
 			reg = <0x12000000 0x10000>;
 			interrupts = <0 72 0>;
 			phys = <&usbdrd_phy0 0>, <&usbdrd_phy0 1>;
@@ -1035,7 +1035,7 @@
 		ranges;
 
 		dwc3 {
-			compatible = "synopsys,dwc3";
+			compatible = "snps,dwc3";
 			reg = <0x12400000 0x10000>;
 			interrupts = <0 73 0>;
 			phys = <&usbdrd_phy1 0>, <&usbdrd_phy1 1>;

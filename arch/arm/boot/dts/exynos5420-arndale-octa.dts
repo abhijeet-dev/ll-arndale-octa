@@ -28,7 +28,7 @@
 
 	codec@11000000 {
 		samsung,mfc-r = <0x43000000 0x800000>;
-		samsung,mfc-l = <0x51000000 0x800000>;
+		samsung,mfc-l = <0x51000000 0x5000000>;
 	};
 
 	firmware@0203F000 {
