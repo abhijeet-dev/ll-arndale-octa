@@ -218,10 +218,10 @@ static void drm_gem_unmap_dma_buf(struct dma_buf_attachment *attach,
 
 void drm_gem_dmabuf_release(struct dma_buf *dma_buf)
 {
-	struct drm_gem_object *obj = dma_buf->priv;
+	//struct drm_gem_object *obj = dma_buf->priv;
 
 	/* drop the reference on the export fd holds */
-	drm_gem_object_unreference_unlocked(obj);
+	//drm_gem_object_unreference_unlocked(obj);
 }
 EXPORT_SYMBOL(drm_gem_dmabuf_release);
 

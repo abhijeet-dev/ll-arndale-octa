@@ -311,6 +311,23 @@ static int kbase_platform_asv_set(int enable);
 #endif /* MALI_DVFS_ASV_ENABLE */
 #endif /* CONFIG_MALI_T6XX_DVFS */
 
+
+#define EXYNOS5_JOB_IRQ_NUMBER 251
+#define EXYNOS5_MMU_IRQ_NUMBER 106
+#define EXYNOS5_GPU_IRQ_NUMBER 149
+
+static kbase_io_resources io_resources_exynos5420 =
+{
+        .job_irq_number   = EXYNOS5_JOB_IRQ_NUMBER,
+        .mmu_irq_number   = EXYNOS5_MMU_IRQ_NUMBER,
+        .gpu_irq_number   = EXYNOS5_GPU_IRQ_NUMBER,
+        .io_memory_region =
+        {
+                .start = EXYNOS5_PA_G3D,
+                .end   = EXYNOS5_PA_G3D + (4096 * 5) - 1
+        }
+};
+
 int kbase_platform_cmu_pmu_control(struct kbase_device *kbdev, int control);
 void kbase_platform_remove_sysfs_file(struct device *dev);
 mali_error kbase_platform_init(struct kbase_device *kbdev);
@@ -525,6 +542,13 @@ const kbase_attribute config_attributes_exynos5420[] = {
 };
 
 kbase_platform_config platform_config;
+
+kbase_platform_config *kbase_get_platform_config(void) {
+	platform_config.attributes = config_attributes_exynos5420;
+	platform_config.io_resources = &io_resources_exynos5420;
+	platform_config.midgard_type = KBASE_MALI_T604;
+	return &platform_config;
+}
 
 static struct clk *clk_g3d = NULL;
 
