@@ -19,6 +19,9 @@ sudo rm /boot/*
 kernelversion=`cat ./include/config/kernel.release`
 sudo installkernel $kernelversion ./arch/arm/boot/zImage ./System.map /boot
 
+# Install device tree binary
+sudo cp arch/arm/boot/dts/exynos5420-arndale-octa.dtb /media/boot/board.dtb
+
 # Reboot
 sudo sync
 sudo umount /media/boot
