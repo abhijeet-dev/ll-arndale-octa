@@ -30,6 +30,10 @@
 #include <linux/list.h>
 #include <linux/dma-mapping.h>
 #include <linux/fs.h>
+#ifdef CONFIG_DMA_SHARED_BUFFER_USES_KDS
+#include <linux/kds.h>
+#include <linux/wait.h>
+#endif
 
 struct device;
 struct dma_buf;
@@ -123,6 +127,12 @@ struct dma_buf {
 	const struct dma_buf_ops *ops;
 	/* mutex to serialize list manipulation, attach/detach and vmap/unmap */
 	struct mutex lock;
+#ifdef CONFIG_DMA_SHARED_BUFFER_USES_KDS
+	struct kds_resource kds;
+	wait_queue_head_t wq_exclusive;
+	wait_queue_head_t wq_shared;
+	struct kds_callback kds_cb;
+#endif
 	unsigned vmapping_counter;
 	void *vmap_ptr;
 	const char *exp_name;
@@ -161,6 +171,23 @@ static inline void get_dma_buf(struct dma_buf *dmabuf)
 {
 	get_file(dmabuf->file);
 }
+
+#ifdef CONFIG_DMA_SHARED_BUFFER_USES_KDS
+/**
+ * get_dma_buf_kds_resource - get a KDS resource for this dma-buf
+ * @dmabuf:    [in]    pointer to dma_buf
+ *
+ * Returns a KDS resource that represents the dma-buf. This should be used by
+ * drivers to synchronize access to the buffer. Note that the caller should
+ * ensure that a reference to the dma-buf exists from the call to
+ * kds_async_wait until kds_resource_set_release is called.
+ */
+static inline struct kds_resource *
+	get_dma_buf_kds_resource(struct dma_buf *dmabuf)
+{
+	return &dmabuf->kds;
+}
+#endif
 
 struct dma_buf_attachment *dma_buf_attach(struct dma_buf *dmabuf,
 							struct device *dev);

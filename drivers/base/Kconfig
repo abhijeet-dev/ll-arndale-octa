@@ -200,6 +200,20 @@ config DMA_SHARED_BUFFER
 	  APIs extension; the file's descriptor can then be passed on to other
 	  driver.
 
+source "drivers/base/kds/Kconfig"
+
+if KDS
+config DMA_SHARED_BUFFER_USES_KDS
+	bool "KDS resource within every dma_buf allocation"
+	default n
+	help
+	  This option adds a KDS resource within every dma_buf allocation.
+endif
+
+source "drivers/base/dma_buf_test_exporter/Kconfig"
+
+source "drivers/base/ump/Kconfig"
+
 config DMA_CMA
 	bool "DMA Contiguous Memory Allocator"
 	depends on HAVE_DMA_CONTIGUOUS && CMA

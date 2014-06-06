@@ -130,15 +130,13 @@ static struct mali_dvfs_info *mali_dvfs_infotbl;
 
 /* TODO(sleffler) should be const but for voltage */
 static struct mali_dvfs_info mali_dvfs_infotbl_exynos5250[MALI_DVFS_STEP] = {
-/*
- * A dummy level is added in 5250 and 5422 to make 8 levels. In 5250 since the
- * max_threshold value of step 6 is 100, the dvfs code will never come to dummy
- * step 7.
+/* A duumy level is added in 5250 to make 8 levels. Since, max_threshold
+ * value of step 6 is 100, the dvfs code will never come to dummy step 7
  */
 #if (MALI_DVFS_STEP == 8)
-	{ 912500, 100000000,  0,   0, DVFS_TIME_TO_CNT(0), DVFS_TIME_TO_CNT(0)},
-	{ 925000, 160000000,  0,   0, DVFS_TIME_TO_CNT(0), DVFS_TIME_TO_CNT(0)},
-	{1025000, 266000000,  0,  85, DVFS_TIME_TO_CNT(1000), DVFS_TIME_TO_CNT(3000)},
+	{ 912500, 100000000,  0,  60, DVFS_TIME_TO_CNT(750), DVFS_TIME_TO_CNT(2000)},
+	{ 925000, 160000000, 40,  75, DVFS_TIME_TO_CNT(750), DVFS_TIME_TO_CNT(2000)},
+	{1025000, 266000000, 65,  85, DVFS_TIME_TO_CNT(1000), DVFS_TIME_TO_CNT(3000)},
 	{1075000, 350000000, 65,  85, DVFS_TIME_TO_CNT(750), DVFS_TIME_TO_CNT(1500)},
 	{1125000, 400000000, 65,  85, DVFS_TIME_TO_CNT(750), DVFS_TIME_TO_CNT(1500)},
 	{1025000, 450000000, 65,  90, DVFS_TIME_TO_CNT(1000), DVFS_TIME_TO_CNT(1500)},
@@ -157,39 +155,14 @@ static struct mali_dvfs_info mali_dvfs_infotbl_exynos5420[MALI_DVFS_STEP] = {
 	{ 862500, 266000000, 65,  85, DVFS_TIME_TO_CNT(1000), DVFS_TIME_TO_CNT(3000)},
 	{ 900000, 350000000, 65,  85, DVFS_TIME_TO_CNT(750), DVFS_TIME_TO_CNT(1500)},
 	{ 937500, 420000000, 65,  85, DVFS_TIME_TO_CNT(750), DVFS_TIME_TO_CNT(1500)},
-	{ 950000, 480000000, 65, 100, DVFS_TIME_TO_CNT(1000), DVFS_TIME_TO_CNT(1500)},
-	{ 987500, 533000000, 75, 100, DVFS_TIME_TO_CNT(750), DVFS_TIME_TO_CNT(1500)},
+	{ 950000, 480000000, 65,  90, DVFS_TIME_TO_CNT(1000), DVFS_TIME_TO_CNT(1500)},
+	{ 987500, 533000000, 75,  90, DVFS_TIME_TO_CNT(750), DVFS_TIME_TO_CNT(1500)},
 	{1025000, 600000000, 75, 100, DVFS_TIME_TO_CNT(750), DVFS_TIME_TO_CNT(1500)}
 
 #else
 #error no table
 #endif
 };
-
-static struct mali_dvfs_info mali_dvfs_infotbl_exynos5422[MALI_DVFS_STEP] = {
-#if (MALI_DVFS_STEP == 8)
-	{  825000, 100000000,  0,  60, DVFS_TIME_TO_CNT(750),
-					DVFS_TIME_TO_CNT(2000)},
-	{  825000, 177000000, 40,  75, DVFS_TIME_TO_CNT(750),
-					DVFS_TIME_TO_CNT(2000)},
-	{  887500, 266000000, 65,  85, DVFS_TIME_TO_CNT(1000),
-					DVFS_TIME_TO_CNT(3000)},
-	{  912500, 350000000, 65,  85, DVFS_TIME_TO_CNT(750),
-					DVFS_TIME_TO_CNT(1500)},
-	{  937500, 420000000, 65,  85, DVFS_TIME_TO_CNT(750),
-					DVFS_TIME_TO_CNT(1500)},
-	{  975000, 480000000, 65, 100, DVFS_TIME_TO_CNT(1000),
-					DVFS_TIME_TO_CNT(1500)},
-	{ 1025000, 543000000, 75, 100, DVFS_TIME_TO_CNT(750),
-					DVFS_TIME_TO_CNT(1500)},
-	{ 1025000, 543000000, 75, 100, DVFS_TIME_TO_CNT(750),
-					DVFS_TIME_TO_CNT(1500)},
-
-#else
-#error no table
-#endif
-};
-
 int kbase_platform_dvfs_init(kbase_device *kbdev);
 void kbase_platform_dvfs_term(void);
 int kbase_platform_dvfs_get_control_status(void);
@@ -311,28 +284,11 @@ static int kbase_platform_asv_set(int enable);
 #endif /* MALI_DVFS_ASV_ENABLE */
 #endif /* CONFIG_MALI_T6XX_DVFS */
 
-
-#define EXYNOS5_JOB_IRQ_NUMBER 251
-#define EXYNOS5_MMU_IRQ_NUMBER 106
-#define EXYNOS5_GPU_IRQ_NUMBER 149
-
-static kbase_io_resources io_resources_exynos5420 =
-{
-        .job_irq_number   = EXYNOS5_JOB_IRQ_NUMBER,
-        .mmu_irq_number   = EXYNOS5_MMU_IRQ_NUMBER,
-        .gpu_irq_number   = EXYNOS5_GPU_IRQ_NUMBER,
-        .io_memory_region =
-        {
-                .start = EXYNOS5_PA_G3D,
-                .end   = EXYNOS5_PA_G3D + (4096 * 5) - 1
-        }
-};
-
 int kbase_platform_cmu_pmu_control(struct kbase_device *kbdev, int control);
 void kbase_platform_remove_sysfs_file(struct device *dev);
 mali_error kbase_platform_init(struct kbase_device *kbdev);
+static int kbase_platform_is_power_on(void);
 void kbase_platform_term(struct kbase_device *kbdev);
-static void kbase_platform_dvfs_set_max(kbase_device *kbdev);
 
 #ifdef CONFIG_MALI_T6XX_DEBUG_SYS
 static int kbase_platform_create_sysfs_file(struct device *dev);
@@ -392,22 +348,10 @@ static void pm_callback_power_off(kbase_device *kbdev)
 #endif /* CONFIG_PM_RUNTIME */
 }
 
-/**
- * Power Management callback - suspend
- */
-static void pm_callback_suspend(kbase_device *kbdev)
-{
-#ifdef CONFIG_MALI_T6XX_DVFS
-	kbase_platform_dvfs_set_max(kbdev);
-#endif
-}
-
 static kbase_pm_callback_conf pm_callbacks =
 {
 	.power_on_callback = pm_callback_power_on,
 	.power_off_callback = pm_callback_power_off,
-	.power_suspend_callback = pm_callback_suspend,
-	.power_resume_callback = NULL
 };
 
 /**
@@ -521,7 +465,7 @@ const kbase_attribute config_attributes_exynos5420[] = {
 
 	{
 		KBASE_CONFIG_ATTR_GPU_FREQ_KHZ_MAX,
-		533000
+		600000
 	},
 	{
 		KBASE_CONFIG_ATTR_GPU_FREQ_KHZ_MIN,
@@ -543,13 +487,6 @@ const kbase_attribute config_attributes_exynos5420[] = {
 
 kbase_platform_config platform_config;
 
-kbase_platform_config *kbase_get_platform_config(void) {
-	platform_config.attributes = config_attributes_exynos5420;
-	platform_config.io_resources = &io_resources_exynos5420;
-	platform_config.midgard_type = KBASE_MALI_T604;
-	return &platform_config;
-}
-
 static struct clk *clk_g3d = NULL;
 
 /**
@@ -560,7 +497,6 @@ static int kbase_platform_power_clock_init(kbase_device *kbdev)
 	struct device *dev =  kbdev->osdev.dev;
 	int timeout;
 	struct exynos_context *platform;
-	void *g3d_status_reg;
 
 	platform = (struct exynos_context *) kbdev->platform_context;
 	if(NULL == platform)
@@ -569,12 +505,11 @@ static int kbase_platform_power_clock_init(kbase_device *kbdev)
 	}
 
 	/* Turn on G3D power */
-	g3d_status_reg = EXYNOS5420_G3D_STATUS;
-	__raw_writel(0x7, EXYNOS5420_G3D_CONFIGURATION);
+	__raw_writel(0x7, EXYNOS5_G3D_CONFIGURATION);
 
 	/* Wait for G3D power stability for 1ms */
 	timeout = 10;
-	while((__raw_readl(g3d_status_reg) & 0x7) != 0x7) {
+	while((__raw_readl(EXYNOS5_G3D_STATUS) & 0x7) != 0x7) {
 		if(timeout == 0) {
 			/* need to call panic  */
 			panic("failed to turn on g3d power\n");
@@ -589,9 +524,11 @@ static int kbase_platform_power_clock_init(kbase_device *kbdev)
 	if (IS_ERR(clk_g3d)) {
 		clk_g3d = NULL;
 		printk(KERN_ERR "failed to clk_get [clk_g3d]\n");
+		/* chrome linux does not have this clock */
 	}
 	else
 	{
+		/* android_v4 support */
 		clk_prepare_enable(clk_g3d);
 		printk("v4 support\n");
 	}
@@ -652,10 +589,12 @@ static int kbase_platform_clock_on(struct kbase_device *kbdev)
 
 	if(clk_g3d)
 	{
+		/* android_v4 support */
 		(void) clk_enable(clk_g3d);
 	}
 	else
 	{
+		/* chrome support */
 		(void) clk_enable(platform->sclk_g3d);
 	}
 
@@ -677,13 +616,23 @@ static int kbase_platform_clock_off(struct kbase_device *kbdev)
 
 	if(clk_g3d)
 	{
+		/* android_v4 support */
 		(void)clk_disable_unprepare(clk_g3d);
 	}
 	else
 	{
+		/* chrome support */
 		(void)clk_disable_unprepare(platform->sclk_g3d);
 	}
 	return 0;
+}
+
+/**
+ * Report GPU power status
+ */
+static inline int kbase_platform_is_power_on(void)
+{
+	return ((__raw_readl(EXYNOS5_G3D_STATUS) & 0x7) == 0x7) ? 1 : 0;
 }
 
 /**
@@ -692,15 +641,14 @@ static int kbase_platform_clock_off(struct kbase_device *kbdev)
 static int kbase_platform_power_on(void)
 {
 	int timeout;
-	void *g3d_status_reg;
 
-	/* Turn on G3D power */
-	g3d_status_reg = EXYNOS5420_G3D_STATUS;
-	__raw_writel(0x7, EXYNOS5420_G3D_CONFIGURATION);
+	/* Turn on G3D  */
+	__raw_writel(0x7, EXYNOS5_G3D_CONFIGURATION);
 
 	/* Wait for G3D power stability */
 	timeout = 1000;
-	while((__raw_readl(g3d_status_reg) & 0x7) != 0x7) {
+
+	while((__raw_readl(EXYNOS5_G3D_STATUS) & 0x7) != 0x7) {
 		if(timeout == 0) {
 			/* need to call panic  */
 			panic("failed to turn on g3d via g3d_configuration\n");
@@ -719,15 +667,14 @@ static int kbase_platform_power_on(void)
 static int kbase_platform_power_off(void)
 {
 	int timeout;
-	void *g3d_status_reg;
 
 	/* Turn off G3D  */
-	g3d_status_reg = EXYNOS5420_G3D_STATUS;
-	__raw_writel(0x0, EXYNOS5420_G3D_CONFIGURATION);
+	__raw_writel(0x0, EXYNOS5_G3D_CONFIGURATION);
 
 	/* Wait for G3D power stability */
 	timeout = 1000;
-	while(__raw_readl(g3d_status_reg) & 0x7) {
+
+	while(__raw_readl(EXYNOS5_G3D_STATUS) & 0x7) {
 		if(timeout == 0) {
 			/* need to call panic */
 			panic( "failed to turn off g3d via g3d_configuration\n");
@@ -842,6 +789,7 @@ static ssize_t mali_sysfs_set_clock(struct device *dev,
 #ifdef CONFIG_MALI_T6XX_DVFS
 	struct kbase_device *kbdev = dev_get_drvdata(dev);
 	struct exynos_context *platform;
+	unsigned int tmp = 0;
 	unsigned long freq;
 	int level;
 
@@ -872,6 +820,11 @@ static ssize_t mali_sysfs_set_clock(struct device *dev,
 	}
 
 	kbase_platform_dvfs_set_level(kbdev, level);
+
+	/* Waiting for clock is stable */
+	do {
+		tmp = __raw_readl(EXYNOS5_CLKDIV_STAT_TOP0);
+	} while (tmp & 0x1000000);
 #endif /* CONFIG_MALI_T6XX_DVFS */
 	return count;
 }
@@ -1355,8 +1308,6 @@ static ssize_t mali_sysfs_show_asv(struct device *dev,
 	struct kbase_device *kbdev;
 	ssize_t ret = 0;
 	int i;
-	int asv_group;
-
 	kbdev = dev_get_drvdata(dev);
 
 	if (!kbdev)
@@ -1364,10 +1315,8 @@ static ssize_t mali_sysfs_show_asv(struct device *dev,
 	if (!buf)
 		return -EINVAL;
 
-	asv_group = exynos_asv_group_get(ID_G3D);
-	ret += scnprintf(buf, PAGE_SIZE, "asv group:%d mp%d\n",
-			asv_group, exynos5420_is_g3d_mp6() ? 6 : 4);
-
+	ret += scnprintf(buf, PAGE_SIZE, "asv group:%d exynos_lot_id:%d\n",
+		exynos_result_of_asv & 0xf, exynos_lot_id);
 	for (i = MALI_DVFS_STEP - 1; i >= 0; i--) {
 		ret += scnprintf(buf + ret, PAGE_SIZE - ret, "%u:%d\n",
 				mali_dvfs_infotbl[i].clock,
@@ -1490,7 +1439,9 @@ mali_error kbase_platform_init(kbase_device *kbdev)
 	}
 
 	kbdev->platform_context = (void *) platform;
-	platform->t6xx_default_clock = 420000000;
+
+	platform->t6xx_default_clock = 600000000;
+
 	platform->cmu_pmu_status = 0;
 	spin_lock_init(&platform->cmu_pmu_lock);
 
@@ -1664,6 +1615,19 @@ static void mali_dvfs_event_proc(struct work_struct *w)
 					(exynos_result_of_asv & 0xf);
 			dvfs_status.asv_need_update = DVFS_NOT_UPDATE_ASV_TBL;
 		}
+	} else if (soc_is_exynos5420()) {
+#ifdef CONFIG_ARM_EXYNOS5420_ASV
+		int i;
+		unsigned int asv_volt;
+
+		for (i = 0; i < MALI_DVFS_STEP; i++) {
+			asv_volt = get_match_volt(ID_G3D,
+					mali_dvfs_infotbl_exynos5420[i].clock
+						/ 1000);
+			if (asv_volt)
+				mali_dvfs_infotbl[i].voltage = asv_volt;
+		}
+#endif
 	}
 #endif
 	spin_unlock_irqrestore(&mali_dvfs_spinlock, irqflags);
@@ -1728,26 +1692,6 @@ int kbase_platform_dvfs_get_control_status(void)
 	return mali_dvfs_control;
 }
 
-
-static void mali_dvfs_infotbl_init_exynos542x(kbase_device *kbdev)
-{
-	int i;
-
-	mali_dvfs_infotbl = mali_dvfs_infotbl_exynos5420;
-
-	for (i = 0; i < MALI_DVFS_STEP; i++) {
-		unsigned int asv_volt;
-#ifdef CONFIG_ARM_EXYNOS5420_ASV
-		asv_volt = get_match_volt(ID_G3D,
-				mali_dvfs_infotbl[i].clock / 1000);
-#else
-		asv_volt = 0;
-#endif
-		if (asv_volt)
-			mali_dvfs_infotbl[i].voltage = asv_volt;
-	}
-}
-
 int kbase_platform_dvfs_init(kbase_device *kbdev)
 {
 	unsigned long irqflags;
@@ -1772,7 +1716,17 @@ int kbase_platform_dvfs_init(kbase_device *kbdev)
 	mali_dvfs_status_current.asv_group = -1;
 #endif
 	mali_dvfs_control = 1;
-	mali_dvfs_infotbl_init_exynos542x(kbdev);
+
+	if (soc_is_exynos5250()) {
+		mali_dvfs_infotbl = mali_dvfs_infotbl_exynos5250;
+#ifdef MALI_DVFS_ASV_ENABLE
+		mali_dvfs_vol_default = mali_dvfs_vol_default_exynos5250;
+		mali_dvfs_asv_vol_tbl_special =
+				mali_dvfs_asv_vol_tbl_special_exynos5250;
+		mali_dvfs_asv_vol_tbl = mali_dvfs_asv_vol_tbl_exynos5250;
+#endif
+	} else if (soc_is_exynos5420())
+		mali_dvfs_infotbl = mali_dvfs_infotbl_exynos5420;
 
 	spin_unlock_irqrestore(&mali_dvfs_spinlock, irqflags);
 
@@ -1923,7 +1877,8 @@ static void kbase_platform_dvfs_set_clock(kbase_device *kbdev, int freq)
 	static struct clk * fout_gpll = NULL;
 	static int _freq = -1;
 	static unsigned long gpll_rate_prev = 0;
-	unsigned long gpll_rate = 0;
+	unsigned long gpll_rate = 0, aclk_400_rate = 0;
+	unsigned long tmp = 0;
 	struct exynos_context *platform;
 	unsigned int i = MALI_DVFS_STEP;
 
@@ -1938,10 +1893,15 @@ static void kbase_platform_dvfs_set_clock(kbase_device *kbdev, int freq)
 		return;
 
 	if (mout_gpll == NULL) {
-		mout_gpll = clk_get(kbdev->osdev.dev, "mout_vpll");
-		fin_gpll = clk_get(kbdev->osdev.dev, "ext_xtal");
-		fout_gpll = clk_get(kbdev->osdev.dev, "fout_vpll");
-
+		if (soc_is_exynos5250()) {
+			mout_gpll = clk_get(kbdev->osdev.dev, "mout_gpll");
+			fin_gpll = clk_get(kbdev->osdev.dev, "ext_xtal");
+			fout_gpll = clk_get(kbdev->osdev.dev, "fout_gpll");
+		} else if (soc_is_exynos5420()) {
+			mout_gpll = clk_get(kbdev->osdev.dev, "mout_vpll");
+			fin_gpll = clk_get(kbdev->osdev.dev, "ext_xtal");
+			fout_gpll = clk_get(kbdev->osdev.dev, "fout_vpll");
+		}
 		if (IS_ERR(mout_gpll) || IS_ERR(fin_gpll) || IS_ERR(fout_gpll))
 			panic("clk_get ERROR");
 	}
@@ -1952,15 +1912,21 @@ static void kbase_platform_dvfs_set_clock(kbase_device *kbdev, int freq)
 	trace_mali_dvfs_set_clock(freq);
 
 	for (i = 0; i < MALI_DVFS_STEP; i++)
-		if (freq == mali_dvfs_infotbl[i].clock)
+		if (freq == mali_dvfs_infotbl[i].clock) {
+			gpll_rate = freq;
+			aclk_400_rate = freq;
 			break;
+		}
 	if (i == MALI_DVFS_STEP)
 		return;
 
-	gpll_rate = freq;
-
 	/* if changed the GPLL rate, set rate for GPLL and wait for lock time */
 	if( gpll_rate != gpll_rate_prev) {
+		/*for stable clock input.*/
+		if (soc_is_exynos5250())
+			clk_set_rate(platform->sclk_g3d, 100000000);
+		else if (soc_is_exynos5420())
+			clk_set_rate(platform->sclk_g3d, 100000000);
 		clk_set_parent(mout_gpll, fin_gpll);
 
 		/*change gpll*/
@@ -1972,10 +1938,15 @@ static void kbase_platform_dvfs_set_clock(kbase_device *kbdev, int freq)
 	}
 
 	_freq = freq;
+	clk_set_rate(platform->sclk_g3d, aclk_400_rate);
 
+	/* Waiting for clock is stable */
+	do {
+		tmp = __raw_readl(/*EXYNOS5_CLKDIV_STAT_TOP0*/EXYNOS_CLKREG(0x10610));
+	} while (tmp & 0x1000000);
 #if MALI_DVFS_DEBUG
 	printk(KERN_DEBUG "dvfs_set_clock GPLL : %lu, ACLK_400 : %luMhz\n",
-			gpll_rate, clk_get_rate(platform->sclk_g3d));
+			gpll_rate, aclk_400_rate);
 #endif /* MALI_DVFS_DEBUG */
 	return;
 }
@@ -2026,25 +1997,6 @@ static void kbase_platform_dvfs_set_level(kbase_device *kbdev, int level)
 		kbase_platform_dvfs_set_vol(mali_dvfs_infotbl[level].voltage);
 	}
 	level_prev = level;
-}
-
-static void kbase_platform_dvfs_set_max(kbase_device *kbdev)
-{
-	int i, level;
-
-	/*
-	 * Firmware may initialize the GPU clocks at a rate higher than the
-	 * one we suspended at. Set the maximum frequency and voltage at
-	 * suspend time so that we don't under-volt the GPU during resume.
-	 */
-	for (i = 0; i < MALI_DVFS_STEP; i++)
-		if (mali_dvfs_infotbl[i].max_threshold == 100) {
-			level = i;
-			break;
-		}
-
-	kbase_platform_dvfs_set_level(kbdev, level);
-	mali_dvfs_status_current.step = level;
 }
 #endif /* CONFIG_MALI_T6XX_DVFS */
 

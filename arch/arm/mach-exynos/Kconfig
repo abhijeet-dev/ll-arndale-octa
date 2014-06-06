@@ -100,6 +100,7 @@ config SOC_EXYNOS5420
 	select PM_GENERIC_DOMAINS if PM
 	select S5P_PM if PM
 	select S5P_SLEEP if PM
+	select S5P_DEV_MFC
 	help
 	  Enable EXYNOS5420 SoC support
 
@@ -118,6 +119,12 @@ config SOC_EXYNOS5440
 	select PM_OPP
 	help
 	  Enable EXYNOS5440 SoC support
+
+config ARM_EXYNOS5420_ASV
+	bool "SAMSUNG Exynos 5420 ASV support"
+	depends on SOC_EXYNOS5420
+	help
+		Enables EXYNOS5420 ASV support
 
 endmenu
 

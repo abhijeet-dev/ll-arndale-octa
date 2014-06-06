@@ -131,12 +131,13 @@
 		clock-names = "pll_ref", "pll_in", "sclk_audio", "sclk_pcm_in";
 	};
 
-	codec@11000000 {
+	mfc: codec@11000000 {
 		compatible = "samsung,mfc-v7";
 		reg = <0x11000000 0x10000>;
 		interrupts = <0 96 0>;
 		clocks = <&clock 401>;
 		clock-names = "mfc";
+		samsung,power-domain = <&mfc_pd>;
 	};
 
 	mmc_0: mmc@12200000 {
@@ -218,6 +219,9 @@
 	mfc_pd: power-domain@10044060 {
 		compatible = "samsung,exynos4210-pd";
 		reg = <0x10044060 0x20>;
+		clocks = <&clock 1>, <&clock 1030>, <&clock 1031>,
+			 <&clock 2049>;
+		clock-names = "oscclk", "pclk0", "clk0" , "dclk0";
 	};
 
 /*
@@ -837,7 +841,9 @@
 		reg = <0x11800000 0x5000>;
 		interrupts = <0 219 0>, <0 74 0>, <0 117 0>;
 		interrupt-names = "JOB", "MMU", "GPU";
-		clocks = <&clock 501>, <&clock 500>;
-		clock-names = "g3d", "aclk_g3d";
+		clocks = <&clock 501>, <&clock 500>, <&clock 642>, <&clock 1>,
+			<&clock 9>;
+		clock-names = "g3d", "aclk_g3d", "mout_vpll", "ext_xtal",
+			"fout_vpll";
 	};
 };
